@@ -1,0 +1,86 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv("datafile_forest_fire.csv")
+df
+
+df.isna().sum()
+
+
+df.plot(kind='bar', figsize=(10, 10))
+plt.title('Number of Cases by State/UT')
+plt.xlabel('States/UTs')
+plt.ylabel('Number of Cases')
+plt.xticks(rotation=90)
+plt.legend(title='Year')
+plt.show()
+
+
+
+
+plt.figure(figsize=(20,10))
+
+plt.subplot(3, 1, 1)
+plt.hist(df['2010-2011'], bins=15, color='blue', alpha=0.7)
+plt.title('Distribution of Cases for 2010-2011')
+plt.xlabel('Number of Cases')
+plt.ylabel('Frequency')
+
+plt.subplot(3, 1, 2)
+plt.hist(df['2009-10'], bins=20, color='green', alpha=0.7)
+plt.title('Distribution of Cases for 2009-10')
+plt.xlabel('Number of Cases')
+plt.ylabel('Frequency')
+
+plt.subplot(3, 1, 3)
+plt.hist(df['2008-09'], bins=20, color='orange', alpha=0.7)
+plt.title('Distribution of Cases for 2008-09')
+plt.xlabel('Number of Cases')
+plt.ylabel('Frequency')
+
+plt.tight_layout()
+plt.show()
+
+
+
+
+# Plotting a stacked bar chart
+df.plot(kind='bar', stacked=True, figsize=(20, 10))
+plt.title('Number of Cases by State/UT')
+plt.xlabel('States/UTs')
+plt.ylabel('Number of Cases')
+plt.xticks(rotation=90)
+plt.legend(title='Year', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+
+
+
+year = '2010-2011'
+
+# Get the data for the chosen year
+data = df[year]
+
+# Plotting a pie chart
+plt.figure(figsize=(15, 15))
+plt.pie(data, labels=data.index,autopct='%1.1f%%', startangle=140)
+plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+# plt.title(f'Distribution of Cases for {year}', pad=20)
+
+# Show the plot
+plt.show()
+
+
+
+plt.figure(figsize=(20, 10))
+plt.scatter(df['2008-09'], df['2009-10'], s=df['2010-2011']*10 )
+plt.title('Number of Cases by State/UT for 2008-09 vs 2009-10')
+plt.xlabel('Cases for 2008-09')
+plt.ylabel('Cases for 2009-10')
+
+# Adding labels for each point
+for i, state in enumerate(df.index):
+    plt.text(df['2008-09'][i], df['2009-10'][i], state)
+
+plt.show()
