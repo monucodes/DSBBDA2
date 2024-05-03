@@ -1,0 +1,29 @@
+Su – hduser 
+
+Start-dfs.sh 
+
+Start-yarn.sh 
+
+Jps 
+
+Cd /usr/local/hive/bin 
+
+./hive 
+
+Create database db1; 
+
+Use db1 
+
+Create table t1(id int, name string) 
+
+Create table t2(id int, marks string) 
+
+Insert into table t1 values(1,”abc”) 
+
+Insert into table t1 values(2,”xyz”) 
+
+Insert into table t2 values(1,90) 
+
+Insert into table t2 values(2,95) 
+
+Select a.id, a.name, b.marks from t1 a join t2 b on a.id = b.id 
