@@ -1,0 +1,125 @@
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+from google.colab import files
+
+
+    # The webpage URL
+    URL = "https://www.amazon.com/"
+    HEADERS = ({'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36', 'Accept-Language': 'en-US, en;q=0.5'})
+
+    # HTTP Request
+    webpage = requests.get(URL, headers=HEADERS)
+
+
+def get_data(url:str):
+    page = requests.get(url, cookies=COOKIES, headers=HEADERS)
+    return page
+
+
+def asin_number(soup):
+    data_asins = []
+    for item in soup.find_all("div", {"data-component-type": "s-search-result"}):
+        data_asins.append(item['data-asin'])
+    return data_asins
+
+print(data_asins)
+
+
+def fetch_href(soup):
+    links = []
+    for item in soup.findAll("a",{'data-hook':"see-all-reviews-link-foot"}):
+        links.append(item['href'])
+    return links[0]
+
+
+def customer_review(soup):
+    customer_names = []
+    review_texts = []
+
+    review_blocks = soup.find_all("div", class_="a-section review aok-relative")
+    for block in review_blocks:
+        name = block.find("span", class_="a-profile-name")
+        review_text = block.find("span", class_="a-size-base review-text review-text-content")
+
+        if name and review_text:
+            name_text = name.text.strip()
+            review_text = review_text.text.strip()
+
+            if len(name_text) > 0 and len(review_text) > 0:
+                customer_names.append(name_text)
+                review_texts.append(review_text)
+
+    return customer_names, review_texts
+
+
+def customer_rating(soup):
+    data_out_list = []
+    data_str = ""
+    td_tag_list = soup.findAll(lambda tag: "data-hook" in tag.attrs and tag["data-hook"] == "review-star-rating")
+    for item in td_tag_list:
+        selected_item = item.findAll("span", attrs={'class': 'a-icon-alt'})
+        if selected_item:
+            data_str = selected_item[0].get_text().split("out")[0].strip(" ")
+            data_int = int(float(data_str))
+            data_out_list.append(data_int)
+    return data_out_list
+
+
+
+def extract_r_and_r(data_asin):
+    all_reviews = []
+    all_customer_names = []
+    review_data = []
+    rating_data = []
+
+    url = f"https://www.amazon.in/dp/{data_asin}"
+
+    response = get_data(url)
+    soup = BeautifulSoup(response.content)
+    link = fetch_href(soup)
+
+    i = 0
+    print(f"Fetching reviews from the product: {data_asin}")
+    while 1:
+        i += 1
+        url = f"https://www.amazon.in{link}&pageNumber={i}"
+        response = get_data(url)
+        soup = BeautifulSoup(response.text)
+        temp_customer_names, review_data = customer_review(soup)
+        all_customer_names.extend(temp_customer_names)
+        review_data = [review for review in review_data if len(review) > 0]
+        temp_rating_data = customer_rating(soup)
+        rating_data.extend(temp_rating_data)
+        if len(review_data) == 0:
+            break
+        all_reviews += review_data
+
+    print("Length of all_customer_names:", len(all_customer_names))
+    print("Length of all_reviews:", len(all_reviews))
+    print("Length of rating_data:", len(rating_data))
+
+    reviews_df = pd.DataFrame({'customer_name': all_customer_names,
+                               'reviews': all_reviews,
+                               'ratings': rating_data})
+
+    reviews_df["ASIN"] = data_asin
+    print("{} has {} reviews".format(data_asin, reviews_df.shape[0]))
+    return reviews_df
+
+
+data_asins = ['B0CKBW8L3M']
+r_and_r_file_name = "Reviews_and_Ratings.xlsx"
+
+
+li = []
+for asins in data_asins:
+    df = extract_r_and_r(asins)
+    li.append(df)
+
+reviews_df = pd.concat(li, axis=0,
+                       ignore_index=True)
+
+reviews_df.to_excel(r_and_r_file_name, index=False)
+
+files.download(r_and_r_file_name)
