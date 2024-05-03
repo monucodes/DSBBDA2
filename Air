@@ -1,0 +1,114 @@
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("datasets/AirQualityUCI.csv" , encoding ='ISO-8859-1',low_memory=False)
+
+df.head()
+
+df.tail()
+
+df.describe()
+
+df.dtypes
+
+df.isnull().sum()
+
+df.columns
+
+df = df[[ 'sampling_date', 'state', 'location', 'type',
+       'so2', 'no2', 'rspm',  'location_monitoring_station',
+       'date']]
+
+
+df.shape
+
+df.isnull().sum()
+
+df = df.loc[df['rspm'].isna() != True].copy()
+
+df.isnull().sum()
+
+df = df.loc[df['so2'].isna() != True].copy()
+
+df.isnull().sum()
+
+df = df.loc[df['no2'].isna() != True].copy()
+
+df.isnull().sum()
+
+df = df.loc[df['location_monitoring_station'].isna() != True].copy()
+
+df.isnull().sum()
+
+df = df.loc[df['date'].isna() != True].copy()
+
+df.head()
+
+df.isnull().sum()
+
+df.info()
+
+df.nunique()
+
+df['year'] = pd.to_datetime(df['date']).dt.year
+
+df.head()
+
+df = df[['sampling_date', 'state', 'location', 'type', 'so2', 'no2', 'rspm',
+       'location_monitoring_station', 'year']]
+
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import LabelEncoder
+
+
+label_encoder = LabelEncoder()
+df['state'] = label_encoder.fit_transform(df['state'])
+df['location'] = label_encoder.fit_transform(df['location'])
+df['type'] = label_encoder.fit_transform(df['type'])
+df['location_monitoring_station'] = label_encoder.fit_transform(df['location_monitoring_station'])
+
+
+df.columns
+
+X = df.drop(['rspm', 'sampling_date'] , axis=1)
+y = df['rspm']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+rmse = mean_squared_error(y_test, y_pred, squared=False)
+print(f"Root Mean Squared Error: {rmse:.2f}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
