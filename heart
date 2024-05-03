@@ -1,0 +1,92 @@
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv("datasets/heart_disease_uci.csv")
+
+df.head()
+
+df.tail()
+
+df.describe()
+
+df.shape
+
+df.isnull().sum()
+
+df = df[['age', 'sex' , 'cp', 'trestbps' , 'chol' , 'fbs' , 'restecg' ,'thalch' , 'exang' ,'num']]
+
+df.shape
+
+df.isnull().sum()
+
+df = df.rename(columns ={
+    'cp' : 'chest_pain',
+    'trestbps' : 'rest_blood_pressure',
+    'chol' : 'cholesterol',
+    'fbs' : 'fast_blood_sugar',
+    'restecg' : 'rest_ecg',
+    'thalch' : 'max_heart_rate',
+    'exang' : 'exercise_angina',
+    'num' : 'outcome'
+})
+
+df.columns
+
+df
+
+df =df.loc[df['fast_blood_sugar'].isna() != True]
+
+df.isnull().sum()
+
+df = df.loc[df['rest_blood_pressure'].isna() != True].copy()
+
+df.isnull().sum()
+
+df = df.loc[df['cholesterol'].isna() != True].copy()
+
+df.isnull().sum()
+
+df = df.loc[df['rest_ecg'].isna() != True].copy()
+
+df.isnull().sum()
+
+df.nunique()
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
+labelencoder = LabelEncoder()
+
+df['sex'] = labelencoder.fit_transform(df['sex'])
+df['chest_pain'] = labelencoder.fit_transform(df['chest_pain'])
+df['fast_blood_sugar'] = labelencoder.fit_transform(df['fast_blood_sugar'])
+df['rest_ecg'] = labelencoder.fit_transform(df['rest_ecg'])
+df['exercise_angina'] = labelencoder.fit_transform(df['exercise_angina'])
+
+df.head()
+
+df.dtypes
+
+df.columns
+
+X = df[['age', 'sex', 'chest_pain', 'rest_blood_pressure', 'cholesterol',
+       'fast_blood_sugar', 'rest_ecg', 'max_heart_rate', 'exercise_angina']]
+Y = df['outcome']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.9, random_state=42)
+
+decision_tree = DecisionTreeClassifier(random_state=42)
+
+decision_tree.fit(X_train, y_train)
+
+y_pred = decision_tree.predict(X_test)
+
+y_pred
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print(f"Accuracy: {accuracy }")
+
+print(classification_report(y_test, y_pred))
